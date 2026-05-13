@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IM·PULSO · Estado BBDD</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  body { font-family: 'Manrope', system-ui, sans-serif; background: #0e1428; color: #e8eaf2; }
+  .brand-navy { color: #141B36; }
+  .bg-navy { background: #141B36; }
+  .bg-navy-light { background: #1f2950; }
+  .text-orange { color: #FF4D2E; }
+  .bg-orange { background: #FF4D2E; }
+  .border-orange { border-color: #FF4D2E; }
+  .card { background: #1f2950; border: 1px solid #2a356d; border-radius: 12px; }
+  .kpi { background: linear-gradient(135deg, #1f2950 0%, #243072 100%); border-radius: 16px; }
+  .table-header { background: #243072; color: #cfd3e6; }
+  details > summary { cursor: pointer; }
+  details[open] > summary { border-bottom: 1px solid #2a356d; padding-bottom: 0.5rem; }
+  .pill { display: inline-block; padding: 2px 8px; border-radius: 9999px; font-size: 11px; font-weight: 600; }
+  .pill-green { background: #14532d; color: #86efac; }
+  .pill-amber { background: #78350f; color: #fcd34d; }
+  .pill-red { background: #7f1d1d; color: #fca5a5; }
+  .pill-blue { background: #1e3a8a; color: #93c5fd; }
+</style>
+</head>
+<body class="min-h-screen">
+<div class="max-w-7xl mx-auto p-6">
+
+<!-- HEADER -->
+<header class="flex flex-col sm:flex-row sm:items-end justify-between gap-3 pb-6 border-b border-slate-700">
+  <div>
+    <h1 class="text-4xl font-extrabold tracking-tight">
+      <span class="text-orange">IM·PULSO</span> <span class="text-slate-300">· Estado BBDD</span>
+    </h1>
+    <p class="text-slate-400 mt-1 text-sm">Snapshot vivo de la base de datos inmobiliaria. Regenerado tras cada sync.</p>
+  </div>
+  <div class="text-right text-sm text-slate-400">
+    <div>Generado <span class="text-slate-200 font-semibold">13-05-2026 18:24:27</span></div>
+    <div>Última sync: <span class="text-orange font-semibold">12-05-2026 18:56</span></div>
+  </div>
+</header>
+
+<!-- HERO KPIs -->
+<section class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mt-6">
+  <div class="kpi p-5">
+    <div class="text-xs uppercase tracking-wider text-slate-400">🏠 Propiedades</div>
+    <div class="text-3xl font-bold mt-1">384.737</div>
+  </div>
+  <div class="kpi p-5">
+    <div class="text-xs uppercase tracking-wider text-slate-400">📊 Histórico</div>
+    <div class="text-3xl font-bold mt-1">3.879.357</div>
+    <div class="text-xs text-slate-400 mt-1">filas precio</div>
+  </div>
+  <div class="kpi p-5">
+    <div class="text-xs uppercase tracking-wider text-slate-400">📦 Cargas</div>
+    <div class="text-3xl font-bold mt-1">29</div>
+  </div>
+  <div class="kpi p-5">
+    <div class="text-xs uppercase tracking-wider text-slate-400">🏙️ Municipios</div>
+    <div class="text-3xl font-bold mt-1">527</div>
+  </div>
+  <div class="kpi p-5">
+    <div class="text-xs uppercase tracking-wider text-slate-400">📜 CPs notariales</div>
+    <div class="text-3xl font-bold mt-1">6</div>
+  </div>
+  <div class="kpi p-5">
+    <div class="text-xs uppercase tracking-wider text-slate-400">📈 % con histórico</div>
+    <div class="text-3xl font-bold mt-1 text-orange">44.4%</div>
+    <div class="text-xs text-slate-400 mt-1">52.8% parcial · 2.8% vacío</div>
+  </div>
+</section>
+
+<!-- TIMELINE CARGAS -->
+<section class="card p-5 mt-6">
+  <h2 class="text-xl font-bold mb-3">⏱️ Timeline cargas (últimas 20)</h2>
+  <div class="grid lg:grid-cols-2 gap-6">
+    <div>
+      <canvas id="chartCargas" height="180"></canvas>
+    </div>
+    <div class="overflow-x-auto max-h-72 overflow-y-auto">
+      <table class="w-full text-xs">
+        <thead class="table-header sticky top-0">
+          <tr>
+            <th class="p-2 text-left">#</th>
+            <th class="p-2 text-left">Fecha</th>
+            <th class="p-2 text-left">Archivo / zona</th>
+            <th class="p-2 text-right">Nuevos</th>
+            <th class="p-2 text-right">Actualizados</th>
+            <th class="p-2 text-right">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="border-b border-slate-700 hover:bg-slate-800">
+            <td class="p-2 text-orange font-semibold">#31</td>
+            <td class="p-2 text-slate-300">12-05-2026 18:56</td>
+            <td class="p-2"><div class="text-slate-200 truncate max-w-xs" title="Valencia_Provincia_20260506.xlsx">València</div><div class="text-slate-500 text-[10px] truncate max-w-xs">Valencia_Provincia_20260506.xlsx</div></td>
+            <td class="p-2 text-right text-green-400">+9.853</td>
+            <td class="p-2 text-right text-slate-300">70.610</td>
+            <td class="p-2 text-right font-semibold">80.463</td>
+          </tr>
+          <tr class="border-b border-slate-700 hover:bg-slate-800">
+            <td class="p-2 text-orange font-semibold">#30</td>
+            <td class="p-2 text-slate-300">12-05-2026 18:54</td>
+            <td class="p-2"><div class="text-slate-200 truncate max-w-xs" title="Castellon_Provincia_20260506.xlsx">Castellón de la Plana / Castello de la Plana</div><div class="text-slate-500 text-[10px] truncate max-w-xs">Castellon_Provincia_20260506.xlsx</div></td>
+            <td class="p-2 text-right text-green-400">+52.226</td>
+            <td class="p-2 text-right text-slate-300">0</td>
+            <td class="p-2 text-right font-semibold">52.238</td>
+          </tr>
+          <tr class="border-b border-slate-700 hover:bg-slate-800">
+            <td class="p-2 text-orange font-semibold">#29</td>
+            <td class="p-2 text-slate-300">21-04-2026 12:33</td>
+            <td class="p-2"><div class="text-slate-200 truncate max-w-xs" title="Valencia_Provincia_20260420.xlsx">València</div><div class="text-slate-500 text-[10px] truncate max-w-xs">Valencia_Provincia_20260420.xlsx</div></td>
+            <td class="p-2 text-right text-green-400">+64.925</td>
+            <td class="p-2 text-right text-slate-300">5.683</td>
+            <td class="p-2 text-right font-semibold">70.608</td>
+          </tr>
+          <tr class="border-b border-slate-700 hover:bg-slate-800">
+            <td class="p-2 text-orange font-semibold">#28</td>
+            <td class="p-2 text-slate-300">21-04-2026 12:33</td>
+            <td class="p-2"><div class="text-slate-200 truncate max-w-xs" title="Murcia_VegaMedia_20260420.xlsx">Molina de Segura</div><div class="text-slate-500 text-[10px] truncate max-w-xs">Murcia_VegaMedia_20260420.xlsx</div></td>
+            <td class="p-2 text-right text-green-400">+8.743</td>
+            <td class="p-2 text-right text-slate-300">15</td>
+            <td class="p-2 text-right font-semibold">8.758</td>
+          </tr>
+          <tr class="border-b border-slate-700 hover:bg-slate-800">
+            <td class="p-2 text-orange font-semibold">#27</td>
+            <td class="p-2 text-slate-300">21-04-2026 12:18</td>
+            <td class="p-2"><div class="text-slate-200 truncate max-w-xs" title="Alicante_VinalopoMitja_20260421.xlsx">Elda</div><div class="text-slate-500 text-[10px] truncate max-w-xs">Alicante_VinalopoMitja_20260421.xlsx</div></td>
+            <td class="p-2 text-right text-green-400">+180</td>
+            <td class="p-2 text-right text-slate-300">13.306</td>
+            <td class="p-2 text-right font-semibold">13.486</td>
+          </tr>
+          <tr class="border-b border-slate-700 hover:bg-slate-800">
+            <td class="p-2 text-orange font-semibold">#26</td>
+            <td class="p-2 text-slate-300">11-04-2026 12:42</td>
+            <td class="p-2"><div class="text-slate-200 truncate max-w-xs" title="Alicante_VinalopoMitja_20260411.xlsx">Elda</div><div class="text-slate-500 text-[10px] truncate max-w-xs">Alicante_VinalopoMitja_20260411.xlsx</div></td>
+            <td class="p-2 text-right text-green-400">+657</td>
+            <td class="p-2 text-right text-slate-300">12.649</td>
+            <td class="p-2 text-right font-semibold">13.306</td>
+          </tr>
+          <tr class="border-b border-slate-700 hover:bg-slate-800">
+            <td class="p-2 text-orange font-semibold">#25</td>
+            <td class="p-2 text-slate-300">13-03-2026 11:38</td>
+            <td class="p-2"><div class="text-slate-200 truncate max-w-xs" title="Alicante - Marina Baixa - ANALISIS 20260311.xlsx">Benidorm</div><div class="text-slate-500 text-[10px] truncate max-w-xs">Alicante - Marina Baixa - ANALISIS 20260311.xlsx</div></td>
+            <td class="p-2 text-right text-green-400">+38.682</td>
+            <td class="p-2 text-right text-slate-300">21</td>
+            <td class="p-2 text-right font-semibold">38.703</td>
+          </tr>
+          <tr class="border-b border-slate-700 hover:bg-slate-800">
+            <td class="p-2 text-orange font-semibold">#24</td>
+            <td class="p-2 text-slate-300">13-03-2026 07:48</td>
+            <td class="p-2"><div class="text-slate-200 truncate max-w-xs" title="Alicante - Baix Vinalopó - ANÁLISIS 20260311.xlsx">Elche / Elx</div><div class="text-slate-500 text-[10px] truncate max-w-xs">Alicante - Baix Vinalopó - ANÁLISIS 20260311.xlsx</div></td>
+            <td class="p-2 text-right text-green-400">+756</td>
+            <td class="p-2 text-right text-slate-300">28.568</td>
+            <td class="p-2 text-right font-semibold">29.324</td>
+          </tr>
+          <tr class="border-b border-slate-700 hover:bg-slate-800">
+            <td class="p-2 text-orange font-semibold">#23</td>
+            <td class="p-2 text-slate-300">12-03-2026 17:31</td>
+            <td class="p-2"><div class="text-slate-200 truncate max-w-xs" title="Valencia - Camins al Grau - ANÁLISIS 20260311.xlsx">València</div><div class="text-slate-500 text-[10px] truncate max-w-xs">Valencia - Camins al Grau - ANÁLISIS 20260311.xlsx</div></td>
+            <td class="p-2 text-right text-green-400">+5.663</td>
+            <td class="p-2 text-right text-slate-300">1</td>
+            <td class="p-2 text-right font-semibold">5.664</td>
+          </tr>
+          <tr class="border-b border-slate-700 hover:bg-slate-800">
+            <td class="p-2 text-orange font-semibold">#22</td>
+            <td class="p-2 text-slate-300">12-03-2026 16:33</td>
+            <td class="p-2"><div class="text-slate-200 truncate max-w-xs" title="Murcia - Altiplano Oriental - ANÁLISIS 20260311.xlsx">Yecla</div><div class="text-slate-500 text-[10px] truncate max-w-xs">Murcia - Altiplano Oriental - ANÁLISIS 20260311.xlsx</div></td>
+            <td class="p-2 text-right text-green-400">+3.540</td>
+            <td class="p-2 text-right text-slate-300">20</td>
+            <td class="p-2 text-right font-semibold">3.560</td>
+          </tr>
+          <tr class="border-b border-slate-700 hover:bg-slate-800">
+            <td class="p-2 text-orange font-semibold">#21</td>
+            <td class="p-2 text-slate-300">12-03-2026 13:39</td>
+            <td class="p-2"><div class="text-slate-200 truncate max-w-xs" title="Murcia - Mar Menor - ANÁLISIS 20260227.xlsx">San Pedro del Pinatar</div><div class="text-slate-500 text-[10px] truncate max-w-xs">Murcia - Mar Menor - ANÁLISIS 20260227.xlsx</div></td>
+            <td class="p-2 text-right text-green-400">+0</td>
+            <td class="p-2 text-right text-slate-300">20.061</td>
+            <td class="p-2 text-right font-semibold">20.061</td>
+          </tr>
+          <tr class="border-b border-slate-700 hover:bg-slate-800">
+            <td class="p-2 text-orange font-semibold">#20</td>
+            <td class="p-2 text-slate-300">12-03-2026 07:15</td>
+            <td class="p-2"><div class="text-slate-200 truncate max-w-xs" title="Murcia - Mar Menor - ANÁLISIS 20260227.xlsx">San Pedro del Pinatar</div><div class="text-slate-500 text-[10px] truncate max-w-xs">Murcia - Mar Menor - ANÁLISIS 20260227.xlsx</div></td>
+            <td class="p-2 text-right text-green-400">+0</td>
+            <td class="p-2 text-right text-slate-300">0</td>
+            <td class="p-2 text-right font-semibold">20.061</td>
+          </tr>
+          <tr class="border-b border-slate-700 hover:bg-slate-800">
+            <td class="p-2 text-orange font-semibold">#19</td>
+            <td class="p-2 text-slate-300">10-03-2026 16:25</td>
+            <td class="p-2"><div class="text-slate-200 truncate max-w-xs" title="Murcia - Mar Menor - ANÁLISIS 20260227.xlsx">San Pedro del Pinatar</div><div class="text-slate-500 text-[10px] truncate max-w-xs">Murcia - Mar Menor - ANÁLISIS 20260227.xlsx</div></td>
+            <td class="p-2 text-right text-green-400">+0</td>
+            <td class="p-2 text-right text-slate-300">0</td>
+            <td class="p-2 text-right font-semibold">20.061</td>
+          </tr>
+          <tr class="border-b border-slate-700 hover:bg-slate-800">
+            <td class="p-2 text-orange font-semibold">#18</td>
+            <td class="p-2 text-slate-300">10-03-2026 11:30</td>
+            <td class="p-2"><div class="text-slate-200 truncate max-w-xs" title="Murcia - Campo de Cartagena - ANÁLISIS 20260303.xlsx">Cartagena</div><div class="text-slate-500 text-[10px] truncate max-w-xs">Murcia - Campo de Cartagena - ANÁLISIS 20260303.xlsx</div></td>
+            <td class="p-2 text-right text-green-400">+20.091</td>
+            <td class="p-2 text-right text-slate-300">14</td>
+            <td class="p-2 text-right font-semibold">20.105</td>
+          </tr>
+          <tr class="border-b border-slate-700 hover:bg-slate-800">
+            <td class="p-2 text-orange font-semibold">#17</td>
+            <td class="p-2 text-slate-300">10-03-2026 07:33</td>
+            <td class="p-2"><div class="text-slate-200 truncate max-w-xs" title="Murcia - Bajo Guadalentín - ANÁLISIS 20260303.xlsx">Mazarrón</div><div class="text-slate-500 text-[10px] truncate max-w-xs">Murcia - Bajo Guadalentín - ANÁLISIS 20260303.xlsx</div></td>
+            <td class="p-2 text-right text-green-400">+6.430</td>
+            <td class="p-2 text-right text-slate-300">3</td>
+            <td class="p-2 text-right font-semibold">6.433</td>
+          </tr>
+          <tr class="border-b border-slate-700 hover:bg-slate-800">
+            <td class="p-2 text-orange font-semibold">#16</td>
+            <td class="p-2 text-slate-300">09-03-2026 19:16</td>
+            <td class="p-2"><div class="text-slate-200 truncate max-w-xs" title="Alicante - L'Alcoià - ANÁLISIS 20260307.xlsx">Alcoy / Alcoi</div><div class="text-slate-500 text-[10px] truncate max-w-xs">Alicante - L'Alcoià - ANÁLISIS 20260307.xlsx</div></td>
+            <td class="p-2 text-right text-green-400">+0</td>
+            <td class="p-2 text-right text-slate-300">8.418</td>
+            <td class="p-2 text-right font-semibold">8.418</td>
+          </tr>
+          <tr class="border-b border-slate-700 hover:bg-slate-800">
+            <td class="p-2 text-orange font-semibold">#15</td>
+            <td class="p-2 text-slate-300">09-03-2026 14:28</td>
+            <td class="p-2"><div class="text-slate-200 truncate max-w-xs" title="Alicante - Vinalopó Mitjà - ANÁLISIS 20260309.xlsx">Elda</div><div class="text-slate-500 text-[10px] truncate max-w-xs">Alicante - Vinalopó Mitjà - ANÁLISIS 20260309.xlsx</div></td>
+            <td class="p-2 text-right text-green-400">+312</td>
+            <td class="p-2 text-right text-slate-300">12.336</td>
+            <td class="p-2 text-right font-semibold">12.648</td>
+          </tr>
+          <tr class="border-b border-slate-700 hover:bg-slate-800">
+            <td class="p-2 text-orange font-semibold">#14</td>
+            <td class="p-2 text-slate-300">07-03-2026 16:35</td>
+            <td class="p-2"><div class="text-slate-200 truncate max-w-xs" title="Alicante - L'Alcoià - ANÁLISIS 20260307.xlsx">Alcoy / Alcoi</div><div class="text-slate-500 text-[10px] truncate max-w-xs">Alicante - L'Alcoià - ANÁLISIS 20260307.xlsx</div></td>
+            <td class="p-2 text-right text-green-400">+0</td>
+            <td class="p-2 text-right text-slate-300">8.418</td>
+            <td class="p-2 text-right font-semibold">8.418</td>
+          </tr>
+          <tr class="border-b border-slate-700 hover:bg-slate-800">
+            <td class="p-2 text-orange font-semibold">#13</td>
+            <td class="p-2 text-slate-300">07-03-2026 13:35</td>
+            <td class="p-2"><div class="text-slate-200 truncate max-w-xs" title="Alicante - L'Alacantì - El Campello  - ANÁLISIS 20260307.xlsx">El Campello</div><div class="text-slate-500 text-[10px] truncate max-w-xs">Alicante - L'Alacantì - El Campello  - ANÁLISIS 20260307.xlsx</div></td>
+            <td class="p-2 text-right text-green-400">+5.300</td>
+            <td class="p-2 text-right text-slate-300">4</td>
+            <td class="p-2 text-right font-semibold">5.319</td>
+          </tr>
+          <tr class="border-b border-slate-700 hover:bg-slate-800">
+            <td class="p-2 text-orange font-semibold">#12</td>
+            <td class="p-2 text-slate-300">07-03-2026 11:53</td>
+            <td class="p-2"><div class="text-slate-200 truncate max-w-xs" title="Alicante - L'Alcoià - ANÁLISIS 20260306.xlsx">Alcoy / Alcoi</div><div class="text-slate-500 text-[10px] truncate max-w-xs">Alicante - L'Alcoià - ANÁLISIS 20260306.xlsx</div></td>
+            <td class="p-2 text-right text-green-400">+8.409</td>
+            <td class="p-2 text-right text-slate-300">9</td>
+            <td class="p-2 text-right font-semibold">8.418</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- PROVINCIAS -->
+<section class="card p-5 mt-6">
+  <h2 class="text-xl font-bold mb-3">🗺️ Cobertura por provincia</h2>
+  <div class="grid lg:grid-cols-2 gap-6">
+    <div>
+      <canvas id="chartProvincias" height="220"></canvas>
+    </div>
+    <div class="overflow-x-auto max-h-80 overflow-y-auto">
+      <table class="w-full text-sm">
+        <thead class="table-header sticky top-0">
+          <tr>
+            <th class="p-2 text-left">Provincia</th>
+            <th class="p-2 text-right">Total</th>
+            <th class="p-2 text-right">Activas</th>
+            <th class="p-2 text-right">Retiradas</th>
+            <th class="p-2 text-right">Municipios</th>
+            <th class="p-2 text-right">Última carga</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="border-b border-slate-700 hover:bg-slate-800">
+            <td class="p-2 font-semibold">Sin provincia</td>
+            <td class="p-2 text-right">384.737</td>
+            <td class="p-2 text-right text-green-400">165.239</td>
+            <td class="p-2 text-right text-slate-400">219.498</td>
+            <td class="p-2 text-right">527</td>
+            <td class="p-2 text-right text-slate-300">12-05-2026</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- TOP MUNICIPIOS -->
+<section class="card p-5 mt-6">
+  <h2 class="text-xl font-bold mb-3">🏙️ Top 30 municipios por volumen</h2>
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead class="table-header">
+        <tr>
+          <th class="p-2 text-left">Municipio</th>
+          <th class="p-2 text-right">Total</th>
+          <th class="p-2 text-right">Activas</th>
+          <th class="p-2 text-right">Retiradas</th>
+          <th class="p-2 text-right">Distritos</th>
+          <th class="p-2 text-right">Barrios</th>
+          <th class="p-2 text-right">Última carga</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="border-b border-slate-700 hover:bg-slate-800">
+          <td class="p-2 font-semibold">Torrevieja</td>
+          <td class="p-2 text-right">45.096</td>
+          <td class="p-2 text-right text-green-400">9.616</td>
+          <td class="p-2 text-right text-slate-400">35.480</td>
+          <td class="p-2 text-right">14</td>
+          <td class="p-2 text-right">28</td>
+          <td class="p-2 text-right text-slate-300">19-02-2026</td>
+        </tr>
+        <tr class="border-b border-slate-700 hover:bg-slate-800">
+          <td class="p-2 font-semibold">València</td>
+          <td class="p-2 text-right">29.690</td>
+          <td class="p-2 text-right text-green-400">17.724</td>
+          <td class="p-2 text-right text-slate-400">11.966</td>
+          <td class="p-2 text-right">18</td>
+          <td class="p-2 text-right">77</td>
+          <td class="p-2 text-right text-slate-300">12-05-2026</td>
+        </tr>
+        <tr class="border-b border-slate-700 hover:bg-slate-800">
+          <td class="p-2 font-semibold">Orihuela</td>
+          <td class="p-2 text-right">27.819</td>
+          <td class="p-2 text-right text-green-400">7.621</td>
+          <td class="p-2 text-right text-slate-400">20.198</td>
+          <td class="p-2 text-right">14</td>
+          <td class="p-2 text-right">32</td>
+          <td class="p-2 text-right text-slate-300">21-02-2026</td>
+        </tr>
+        <tr class="border-b border-slate-700 hover:bg-slate-800">
+          <td class="p-2 font-semibold">Elche / Elx</td>
+          <td class="p-2 text-right">19.183</td>
+          <td class="p-2 text-right text-green-400">5.276</td>
+          <td class="p-2 text-right text-slate-400">13.907</td>
+          <td class="p-2 text-right">23</td>
+          <td class="p-2 text-right">22</td>
+          <td class="p-2 text-right text-slate-300">13-03-2026</td>
+        </tr>
+        <tr class="border-b border-slate-700 hover:bg-slate-800">
+          <td class="p-2 font-semibold">Cartagena</td>
+          <td class="p-2 text-right">16.494</td>
+          <td class="p-2 text-right text-green-400">4.631</td>
+          <td class="p-2 text-right text-slate-400">11.863</td>
+          <td class="p-2 text-right">27</td>
+          <td class="p-2 text-right">25</td>
+          <td class="p-2 text-right text-slate-300">10-03-2026</td>
+        </tr>
+        <tr class="border-b border-slate-700 hover:bg-slate-800">
+          <td class="p-2 font-semibold">Benidorm</td>
+          <td class="p-2 text-right">12.822</td>
+          <td class="p-2 text-right text-green-400">4.052</td>
+          <td class="p-2 text-right text-slate-400">8.770</td>
+          <td class="p-2 text-right">7</td>
+          <td class="p-2 text-right">3</td>
+          <td class="p-2 text-right text-slate-300">13-03-2026</td>
+        </tr>
+        <tr class="border-b border-slate-700 hover:bg-slate-800">
+          <td class="p-2 font-semibold">Castellón de la Plana / Castello de la Plana</td>
+          <td class="p-2 text-right">11.911</td>
+          <td class="p-2 text-right text-green-400">7.592</td>
+          <td class="p-2 text-right text-slate-400">4.319</td>
+          <td class="p-2 text-right">6</td>
+          <td class="p-2 text-right">17</td>
+          <td class="p-2 text-right text-slate-300">12-05-2026</td>
+        </tr>
+        <tr class="border-b border-slate-700 hover:bg-slate-800">
+          <td class="p-2 font-semibold">Donostia-San Sebastián</td>
+          <td class="p-2 text-right">7.865</td>
+          <td class="p-2 text-right text-green-400">3.066</td>
+          <td class="p-2 text-right text-slate-400">4.799</td>
+          <td class="p-2 text-right">16</td>
+          <td class="p-2 text-right">9</td>
+          <td class="p-2 text-right text-slate-300">05-03-2026</td>
+        </tr>
+        <tr class="border-b border-slate-700 hover:bg-slate-800">
+          <td class="p-2 font-semibold">Pilar de la Horadada</td>
+          <td class="p-2 text-right">7.477</td>
+          <td class="p-2 text-right text-green-400">1.565</td>
+          <td class="p-2 text-right text-slate-400">5.912</td>
+          <td class="p-2 text-right">14</td>
+          <td class="p-2 text-right">1</td>
+          <td class="p-2 text-right text-slate-300">20-02-2026</td>
+        </tr>
+        <tr class="border-b border-slate-700 hover:bg-slate-800">
+          <td class="p-2 font-semibold">Altea</td>
+          <td class="p-2 text-right">6.387</td>
+          <td class="p-2 text-right text-green-400">2.200</td>
+          <td class="p-2 text-right text-slate-400">4.187</td>
+          <td class="p-2 text-right">7</td>
+          <td class="p-2 text-right">0</td>
+          <td class="p-2 text-right text-slate-300">13-03-2026</td>
+        </tr>
+        <tr class="border-b border-slate-700 hover:bg-slate-800">
+          <td class="p-2 font-semibold">San Pedro del Pinatar</td>
+          <td class="p-2 text-right">5.822</td>
+          <td class="p-2 text-right text-green-400">1.270</td>
+          <td class="p-2 text-right text-slate-400">4.552</td>
+          <td class="p-2 text-right">6</td>
+          <td class="p-2 text-right">1</td>
+          <td class="p-2 text-right text-slate-300">10-03-2026</td>
+        </tr>
+        <tr class="border-b border-slate-700 hover:bg-slate-800">
+          <td class="p-2 font-semibold">Molina de Segura</td>
+          <td class="p-2 text-right">5.707</td>
+          <td class="p-2 text-right text-green-400">1.496</td>
+          <td class="p-2 text-right text-slate-400">4.211</td>
+          <td class="p-2 text-right">3</td>
+          <td class="p-2 text-right">14</td>
+          <td class="p-2 text-right text-slate-300">21-04-2026</td>
+        </tr>
+        <tr class="border-b border-slate-700 hover:bg-slate-800">
+          <td class="p-2 font-semibold">Santa Pola</td>
+          <td class="p-2 text-right">5.505</td>
+          <td class="p-2 text-right text-green-400">1.419</td>
+          <td class="p-2 text-right text-slate-400">4.086</td>
+          <td class="p-2 text-right">9</td>
+          <td class="p-2 text-right">0</td>
+          <td class="p-2 text-right text-slate-300">13-03-2026</td>
+        </tr>
+        <tr class="border-b border-slate-700 hover:bg-slate-800">
+          <td class="p-2 font-semibold">El Campello</td>
+          <td class="p-2 text-right">5.300</td>
+          <td class="p-2 text-right text-green-400">1.559</td>
+          <td class="p-2 text-right text-slate-400">3.741</td>
+          <td class="p-2 text-right">6</td>
+          <td class="p-2 text-right">0</td>
+          <td class="p-2 text-right text-slate-300">07-03-2026</td>
+        </tr>
+        <tr class="border-b border-slate-700 hover:bg-slate-800">
+          <td class="p-2 font-semibold">Los Alcázares</td>
+          <td class="p-2 text-right">5.267</td>
+          <td class="p-2 text-right text-green-400">1.049</td>
+          <td class="p-2 text-right text-slate-400">4.218</td>
+          <td class="p-2 text-right">3</td>
+          <td class="p-2 text-right">0</td>
+          <td class="p-2 text-right text-slate-300">10-03-2026</td>
+        </tr>
+        <tr class="border-b border-slate-700 hover:bg-slate-800">
+          <td class="p-2 font-semibold">La Villajoyosa / Vila Joiosa</td>
+          <td class="p-2 text-right">5.032</td>
+          <td class="p-2 text-right text-green-400">1.578</td>
+          <td class="p-2 text-right text-slate-400">3.454</td>
+          <td class="p-2 text-right">7</td>
+          <td class="p-2 text-right">7</td>
+          <td class="p-2 text-right text-slate-300">13-03-2026</td>
+        </tr>
+        <tr class="border-b border-slate-700 hover:bg-slate-800">
+          <td class="p-2 font-semibold">Alcoy / Alcoi</td>
+          <td class="p-2 text-right">4.970</td>
+          <td class="p-2 text-right text-green-400">1.128</td>
+          <td class="p-2 text-right text-slate-400">3.842</td>
+          <td class="p-2 text-right">9</td>
+          <td class="p-2 text-right">0</td>
+          <td class="p-2 text-right text-slate-300">07-03-2026</td>
+        </tr>
+        <tr class="border-b border-slate-700 hover:bg-slate-800">
+          <td class="p-2 font-semibold">San Javier</td>
+          <td class="p-2 text-right">4.871</td>
+          <td class="p-2 text-right text-green-400">1.057</td>
+          <td class="p-2 text-right text-slate-400">3.814</td>
+          <td class="p-2 text-right">4</td>
+          <td class="p-2 text-right">4</td>
+          <td class="p-2 text-right text-slate-300">10-03-2026</td>
+        </tr>
+        <tr class="border-b border-slate-700 hover:bg-slate-800">
+          <td class="p-2 font-semibold">Finestrat</td>
+          <td class="p-2 text-right">4.844</td>
+          <td class="p-2 text-right text-green-400">1.464</td>
+          <td class="p-2 text-right text-slate-400">3.380</td>
+          <td class="p-2 text-right">4</td>
+          <td class="p-2 text-right">0</td>
+          <td class="p-2 text-right text-slate-300">13-03-2026</td>
+        </tr>
+        <tr class="border-b border-slate-700 hover:bg-slate-800">
+          <td class="p-2 font-semibold">Torre-Pacheco</td>
+          <td class="p-2 text-right">4.068</td>
+          <td class="p-2 text-right text-green-400">987</td>
+          <td class="p-2 text-right text-slate-400">3.081</td>
+          <td class="p-2 text-right">7</td>
+          <td class="p-2 text-right">0</td>
+          <td class="p-2 text-right text-slate-300">10-03-2026</td>
+        </tr>
+        <tr class="border-b border-slate-700 hover:bg-slate-800">
+          <td class="p-2 font-semibold">Mazarrón</td>
+          <td class="p-2 text-right">4.005</td>
+          <td class="p-2 text-right text-green-400">1.503</td>
+          <td class="p-2 text-right text-slate-400">2.502</td>
+          <td class="p-2 text-right">8</td>
+          <td class="p-2 text-right">8</td>
+          <td class="p-2 text-right text-slate-300">10-03-2026</td>
+        </tr>
+        <tr class="border-b border-slate-700 hover:bg-slate-800">
+          <td class="p-2 font-semibold">Oropesa del Mar</td>
+          <td class="p-2 text-right">3.709</td>
+          <td class="p-2 text-right text-green-400">2.586</td>
+          <td class="p-2 text-right text-slate-400">1.123</td>
+          <td class="p-2 text-right">6</td>
+          <td class="p-2 text-right">14</td>
+          <td class="p-2 text-right text-slate-300">12-05-2026</td>
+        </tr>
+        <tr class="border-b border-slate-700 hover:bg-slate-800">
+          <td class="p-2 font-semibold">Alfaz del Pi</td>
+          <td class="p-2 text-right">3.636</td>
+          <td class="p-2 text-right text-green-400">1.186</td>
+          <td class="p-2 text-right text-slate-400">2.450</td>
+          <td class="p-2 text-right">3</td>
+          <td class="p-2 text-right">0</td>
+          <td class="p-2 text-right text-slate-300">13-03-2026</td>
+        </tr>
+        <tr class="border-b border-slate-700 hover:bg-slate-800">
+          <td class="p-2 font-semibold">Elda</td>
+          <td class="p-2 text-right">3.622</td>
+          <td class="p-2 text-right text-green-400">837</td>
+          <td class="p-2 text-right text-slate-400">2.785</td>
+          <td class="p-2 text-right">9</td>
+          <td class="p-2 text-right">0</td>
+          <td class="p-2 text-right text-slate-300">21-04-2026</td>
+        </tr>
+        <tr class="border-b border-slate-700 hover:bg-slate-800">
+          <td class="p-2 font-semibold">Villarreal/Vila-Real</td>
+          <td class="p-2 text-right">3.265</td>
+          <td class="p-2 text-right text-green-400">2.485</td>
+          <td class="p-2 text-right text-slate-400">780</td>
+          <td class="p-2 text-right">6</td>
+          <td class="p-2 text-right">0</td>
+          <td class="p-2 text-right text-slate-300">12-05-2026</td>
+        </tr>
+        <tr class="border-b border-slate-700 hover:bg-slate-800">
+          <td class="p-2 font-semibold">Gandia</td>
+          <td class="p-2 text-right">3.232</td>
+          <td class="p-2 text-right text-green-400">2.513</td>
+          <td class="p-2 text-right text-slate-400">719</td>
+          <td class="p-2 text-right">8</td>
+          <td class="p-2 text-right">3</td>
+          <td class="p-2 text-right text-slate-300">12-05-2026</td>
+        </tr>
+        <tr class="border-b border-slate-700 hover:bg-slate-800">
+          <td class="p-2 font-semibold">La Nucia</td>
+          <td class="p-2 text-right">3.120</td>
+          <td class="p-2 text-right text-green-400">1.076</td>
+          <td class="p-2 text-right text-slate-400">2.044</td>
+          <td class="p-2 text-right">7</td>
+          <td class="p-2 text-right">0</td>
+          <td class="p-2 text-right text-slate-300">13-03-2026</td>
+        </tr>
+        <tr class="border-b border-slate-700 hover:bg-slate-800">
+          <td class="p-2 font-semibold">Gran Alacant</td>
+          <td class="p-2 text-right">3.068</td>
+          <td class="p-2 text-right text-green-400">683</td>
+          <td class="p-2 text-right text-slate-400">2.385</td>
+          <td class="p-2 text-right">7</td>
+          <td class="p-2 text-right">0</td>
+          <td class="p-2 text-right text-slate-300">13-03-2026</td>
+        </tr>
+        <tr class="border-b border-slate-700 hover:bg-slate-800">
+          <td class="p-2 font-semibold">Burriana</td>
+          <td class="p-2 text-right">2.867</td>
+          <td class="p-2 text-right text-green-400">2.039</td>
+          <td class="p-2 text-right text-slate-400">828</td>
+          <td class="p-2 text-right">5</td>
+          <td class="p-2 text-right">0</td>
+          <td class="p-2 text-right text-slate-300">12-05-2026</td>
+        </tr>
+        <tr class="border-b border-slate-700 hover:bg-slate-800">
+          <td class="p-2 font-semibold">Vinarós</td>
+          <td class="p-2 text-right">2.835</td>
+          <td class="p-2 text-right text-green-400">2.144</td>
+          <td class="p-2 text-right text-slate-400">691</td>
+          <td class="p-2 text-right">6</td>
+          <td class="p-2 text-right">0</td>
+          <td class="p-2 text-right text-slate-300">12-05-2026</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- SYNCS POR MUNICIPIO -->
+<section class="card p-5 mt-6">
+  <h2 class="text-xl font-bold mb-1">🔁 Frecuencia de sincronización</h2>
+  <p class="text-slate-400 text-sm mb-3">18 municipios con cargas históricas. Top 40 por número de syncs.</p>
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead class="table-header">
+        <tr>
+          <th class="p-2 text-left">Municipio principal</th>
+          <th class="p-2 text-right">Syncs</th>
+          <th class="p-2 text-right">Última</th>
+          <th class="p-2 text-right">Días desde</th>
+          <th class="p-2 text-right">Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="border-b border-slate-700 hover:bg-slate-800">
+          <td class="p-2 font-semibold">Elda</td>
+          <td class="p-2 text-right">4</td>
+          <td class="p-2 text-right text-slate-300">21-04-2026</td>
+          <td class="p-2 text-right">22</td>
+          <td class="p-2 text-right">
+              <span class="pill pill-amber">22d</span>
+          </td>
+        </tr>
+        <tr class="border-b border-slate-700 hover:bg-slate-800">
+          <td class="p-2 font-semibold">València</td>
+          <td class="p-2 text-right">3</td>
+          <td class="p-2 text-right text-slate-300">12-05-2026</td>
+          <td class="p-2 text-right">0</td>
+          <td class="p-2 text-right">
+              <span class="pill pill-green">FRESCO</span>
+          </td>
+        </tr>
+        <tr class="border-b border-slate-700 hover:bg-slate-800">
+          <td class="p-2 font-semibold">San Pedro del Pinatar</td>
+          <td class="p-2 text-right">3</td>
+          <td class="p-2 text-right text-slate-300">12-03-2026</td>
+          <td class="p-2 text-right">62</td>
+          <td class="p-2 text-right">
+              <span class="pill pill-red">62d</span>
+          </td>
+        </tr>
+        <tr class="border-b border-slate-700 hover:bg-slate-800">
+          <td class="p-2 font-semibold">Alcoy / Alcoi</td>
+          <td class="p-2 text-right">3</td>
+          <td class="p-2 text-right text-slate-300">09-03-2026</td>
+          <td class="p-2 text-right">64</td>
+          <td class="p-2 text-right">
+              <span class="pill pill-red">64d</span>
+          </td>
+        </tr>
+        <tr class="border-b border-slate-700 hover:bg-slate-800">
+          <td class="p-2 font-semibold">Elche / Elx</td>
+          <td class="p-2 text-right">2</td>
+          <td class="p-2 text-right text-slate-300">13-03-2026</td>
+          <td class="p-2 text-right">61</td>
+          <td class="p-2 text-right">
+              <span class="pill pill-red">61d</span>
+          </td>
+        </tr>
+        <tr class="border-b border-slate-700 hover:bg-slate-800">
+          <td class="p-2 font-semibold">Donostia-San Sebastián</td>
+          <td class="p-2 text-right">2</td>
+          <td class="p-2 text-right text-slate-300">05-03-2026</td>
+          <td class="p-2 text-right">69</td>
+          <td class="p-2 text-right">
+              <span class="pill pill-red">69d</span>
+          </td>
+        </tr>
+        <tr class="border-b border-slate-700 hover:bg-slate-800">
+          <td class="p-2 font-semibold">Castellón de la Plana / Castello de la Plana</td>
+          <td class="p-2 text-right">1</td>
+          <td class="p-2 text-right text-slate-300">12-05-2026</td>
+          <td class="p-2 text-right">0</td>
+          <td class="p-2 text-right">
+              <span class="pill pill-green">FRESCO</span>
+          </td>
+        </tr>
+        <tr class="border-b border-slate-700 hover:bg-slate-800">
+          <td class="p-2 font-semibold">Molina de Segura</td>
+          <td class="p-2 text-right">1</td>
+          <td class="p-2 text-right text-slate-300">21-04-2026</td>
+          <td class="p-2 text-right">22</td>
+          <td class="p-2 text-right">
+              <span class="pill pill-amber">22d</span>
+          </td>
+        </tr>
+        <tr class="border-b border-slate-700 hover:bg-slate-800">
+          <td class="p-2 font-semibold">Benidorm</td>
+          <td class="p-2 text-right">1</td>
+          <td class="p-2 text-right text-slate-300">13-03-2026</td>
+          <td class="p-2 text-right">61</td>
+          <td class="p-2 text-right">
+              <span class="pill pill-red">61d</span>
+          </td>
+        </tr>
+        <tr class="border-b border-slate-700 hover:bg-slate-800">
+          <td class="p-2 font-semibold">Yecla</td>
+          <td class="p-2 text-right">1</td>
+          <td class="p-2 text-right text-slate-300">12-03-2026</td>
+          <td class="p-2 text-right">62</td>
+          <td class="p-2 text-right">
+              <span class="pill pill-red">62d</span>
+          </td>
+        </tr>
+        <tr class="border-b border-slate-700 hover:bg-slate-800">
+          <td class="p-2 font-semibold">Cartagena</td>
+          <td class="p-2 text-right">1</td>
+          <td class="p-2 text-right text-slate-300">10-03-2026</td>
+          <td class="p-2 text-right">64</td>
+          <td class="p-2 text-right">
+              <span class="pill pill-red">64d</span>
+          </td>
+        </tr>
+        <tr class="border-b border-slate-700 hover:bg-slate-800">
+          <td class="p-2 font-semibold">Mazarrón</td>
+          <td class="p-2 text-right">1</td>
+          <td class="p-2 text-right text-slate-300">10-03-2026</td>
+          <td class="p-2 text-right">64</td>
+          <td class="p-2 text-right">
+              <span class="pill pill-red">64d</span>
+          </td>
+        </tr>
+        <tr class="border-b border-slate-700 hover:bg-slate-800">
+          <td class="p-2 font-semibold">El Campello</td>
+          <td class="p-2 text-right">1</td>
+          <td class="p-2 text-right text-slate-300">07-03-2026</td>
+          <td class="p-2 text-right">67</td>
+          <td class="p-2 text-right">
+              <span class="pill pill-red">67d</span>
+          </td>
+        </tr>
+        <tr class="border-b border-slate-700 hover:bg-slate-800">
+          <td class="p-2 font-semibold">Cocentaina</td>
+          <td class="p-2 text-right">1</td>
+          <td class="p-2 text-right text-slate-300">07-03-2026</td>
+          <td class="p-2 text-right">67</td>
+          <td class="p-2 text-right">
+              <span class="pill pill-red">67d</span>
+          </td>
+        </tr>
+        <tr class="border-b border-slate-700 hover:bg-slate-800">
+          <td class="p-2 font-semibold">Villena</td>
+          <td class="p-2 text-right">1</td>
+          <td class="p-2 text-right text-slate-300">07-03-2026</td>
+          <td class="p-2 text-right">67</td>
+          <td class="p-2 text-right">
+              <span class="pill pill-red">67d</span>
+          </td>
+        </tr>
+        <tr class="border-b border-slate-700 hover:bg-slate-800">
+          <td class="p-2 font-semibold">Orihuela</td>
+          <td class="p-2 text-right">1</td>
+          <td class="p-2 text-right text-slate-300">21-02-2026</td>
+          <td class="p-2 text-right">81</td>
+          <td class="p-2 text-right">
+              <span class="pill pill-red">81d</span>
+          </td>
+        </tr>
+        <tr class="border-b border-slate-700 hover:bg-slate-800">
+          <td class="p-2 font-semibold">Pilar de la Horadada</td>
+          <td class="p-2 text-right">1</td>
+          <td class="p-2 text-right text-slate-300">20-02-2026</td>
+          <td class="p-2 text-right">82</td>
+          <td class="p-2 text-right">
+              <span class="pill pill-red">82d</span>
+          </td>
+        </tr>
+        <tr class="border-b border-slate-700 hover:bg-slate-800">
+          <td class="p-2 font-semibold">Torrevieja</td>
+          <td class="p-2 text-right">1</td>
+          <td class="p-2 text-right text-slate-300">19-02-2026</td>
+          <td class="p-2 text-right">83</td>
+          <td class="p-2 text-right">
+              <span class="pill pill-red">83d</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- NOTARIAL -->
+<section class="card p-5 mt-6">
+  <h2 class="text-xl font-bold mb-3">📜 Notarial — CPs cargados</h2>
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead class="table-header">
+        <tr>
+          <th class="p-2 text-left">CP</th>
+          <th class="p-2 text-left">Municipio</th>
+          <th class="p-2 text-left">Provincia</th>
+          <th class="p-2 text-right">€/m²</th>
+          <th class="p-2 text-right">Compraventas</th>
+          <th class="p-2 text-right">Importe medio</th>
+          <th class="p-2 text-right">m² medio</th>
+          <th class="p-2 text-right">Cargado</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="border-b border-slate-700 hover:bg-slate-800">
+          <td class="p-2 font-mono text-orange">46023</td>
+          <td class="p-2">València</td>
+          <td class="p-2 text-slate-300">Valencia</td>
+          <td class="p-2 text-right font-semibold">3.130€</td>
+          <td class="p-2 text-right">345</td>
+          <td class="p-2 text-right">296.291€</td>
+          <td class="p-2 text-right">94.7</td>
+          <td class="p-2 text-right text-slate-300">13-05-2026</td>
+        </tr>
+        <tr class="border-b border-slate-700 hover:bg-slate-800">
+          <td class="p-2 font-mono text-orange">46780</td>
+          <td class="p-2">46780</td>
+          <td class="p-2 text-slate-300">-</td>
+          <td class="p-2 text-right font-semibold">1.465€</td>
+          <td class="p-2 text-right">460</td>
+          <td class="p-2 text-right">145.196€</td>
+          <td class="p-2 text-right">99.1</td>
+          <td class="p-2 text-right text-slate-300">22-04-2026</td>
+        </tr>
+        <tr class="border-b border-slate-700 hover:bg-slate-800">
+          <td class="p-2 font-mono text-orange">03640</td>
+          <td class="p-2">Monovar</td>
+          <td class="p-2 text-slate-300">Alicante</td>
+          <td class="p-2 text-right font-semibold">575€</td>
+          <td class="p-2 text-right">154</td>
+          <td class="p-2 text-right">63.765€</td>
+          <td class="p-2 text-right">110.8</td>
+          <td class="p-2 text-right text-slate-300">20-04-2026</td>
+        </tr>
+        <tr class="border-b border-slate-700 hover:bg-slate-800">
+          <td class="p-2 font-mono text-orange">03600</td>
+          <td class="p-2">Elda</td>
+          <td class="p-2 text-slate-300">Alicante</td>
+          <td class="p-2 text-right font-semibold">744€</td>
+          <td class="p-2 text-right">831</td>
+          <td class="p-2 text-right">71.469€</td>
+          <td class="p-2 text-right">96.0</td>
+          <td class="p-2 text-right text-slate-300">11-04-2026</td>
+        </tr>
+        <tr class="border-b border-slate-700 hover:bg-slate-800">
+          <td class="p-2 font-mono text-orange">03190</td>
+          <td class="p-2">Pilar de la Horadada</td>
+          <td class="p-2 text-slate-300">Alicante</td>
+          <td class="p-2 text-right font-semibold">2.909€</td>
+          <td class="p-2 text-right">74</td>
+          <td class="p-2 text-right">262.338€</td>
+          <td class="p-2 text-right">90.2</td>
+          <td class="p-2 text-right text-slate-300">26-03-2026</td>
+        </tr>
+        <tr class="border-b border-slate-700 hover:bg-slate-800">
+          <td class="p-2 font-mono text-orange">03203</td>
+          <td class="p-2">Elche / Elx</td>
+          <td class="p-2 text-slate-300">Alicante</td>
+          <td class="p-2 text-right font-semibold">1.456€</td>
+          <td class="p-2 text-right">410</td>
+          <td class="p-2 text-right">150.598€</td>
+          <td class="p-2 text-right">103.4</td>
+          <td class="p-2 text-right text-slate-300">14-03-2026</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- SALUD -->
+<section class="card p-5 mt-6">
+  <h2 class="text-xl font-bold mb-3">🩺 Salud del histórico</h2>
+  <div class="grid sm:grid-cols-3 gap-4">
+    <div class="kpi p-4">
+      <div class="text-xs text-slate-400 uppercase">Histórico completo (>5 puntos)</div>
+      <div class="text-3xl font-bold text-green-400 mt-2">170.901</div>
+      <div class="text-xs text-slate-400 mt-1">44.4% del total</div>
+    </div>
+    <div class="kpi p-4">
+      <div class="text-xs text-slate-400 uppercase">Histórico parcial (1-5 puntos)</div>
+      <div class="text-3xl font-bold text-yellow-400 mt-2">203.115</div>
+      <div class="text-xs text-slate-400 mt-1">52.8% del total</div>
+    </div>
+    <div class="kpi p-4">
+      <div class="text-xs text-slate-400 uppercase">Sin histórico</div>
+      <div class="text-3xl font-bold text-red-400 mt-2">10.721</div>
+      <div class="text-xs text-slate-400 mt-1">2.8% del total · normal en retirados antes del scraping</div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="mt-8 py-4 border-t border-slate-700 text-center text-xs text-slate-500">
+  <p>Generado por <code class="text-orange">regenerar_dashboard.py</code> el 13-05-2026 18:24:27</p>
+  <p class="mt-1">Fuente: Supabase <code>qrsqnhljcqdrhmccpqpj</code> · Cargas registradas: 29</p>
+</footer>
+
+</div>
+
+<script>
+const cargasData = [{"id": 12, "fecha": "07-03", "nuevos": 8409, "actualizados": 9, "total": 8418}, {"id": 13, "fecha": "07-03", "nuevos": 5300, "actualizados": 4, "total": 5319}, {"id": 14, "fecha": "07-03", "nuevos": 0, "actualizados": 8418, "total": 8418}, {"id": 15, "fecha": "09-03", "nuevos": 312, "actualizados": 12336, "total": 12648}, {"id": 16, "fecha": "09-03", "nuevos": 0, "actualizados": 8418, "total": 8418}, {"id": 17, "fecha": "10-03", "nuevos": 6430, "actualizados": 3, "total": 6433}, {"id": 18, "fecha": "10-03", "nuevos": 20091, "actualizados": 14, "total": 20105}, {"id": 19, "fecha": "10-03", "nuevos": 0, "actualizados": 0, "total": 20061}, {"id": 20, "fecha": "12-03", "nuevos": 0, "actualizados": 0, "total": 20061}, {"id": 21, "fecha": "12-03", "nuevos": 0, "actualizados": 20061, "total": 20061}, {"id": 22, "fecha": "12-03", "nuevos": 3540, "actualizados": 20, "total": 3560}, {"id": 23, "fecha": "12-03", "nuevos": 5663, "actualizados": 1, "total": 5664}, {"id": 24, "fecha": "13-03", "nuevos": 756, "actualizados": 28568, "total": 29324}, {"id": 25, "fecha": "13-03", "nuevos": 38682, "actualizados": 21, "total": 38703}, {"id": 26, "fecha": "11-04", "nuevos": 657, "actualizados": 12649, "total": 13306}, {"id": 27, "fecha": "21-04", "nuevos": 180, "actualizados": 13306, "total": 13486}, {"id": 28, "fecha": "21-04", "nuevos": 8743, "actualizados": 15, "total": 8758}, {"id": 29, "fecha": "21-04", "nuevos": 64925, "actualizados": 5683, "total": 70608}, {"id": 30, "fecha": "12-05", "nuevos": 52226, "actualizados": 0, "total": 52238}, {"id": 31, "fecha": "12-05", "nuevos": 9853, "actualizados": 70610, "total": 80463}];
+const provData = [{"provincia": "Sin provincia", "total": 384737}];
+
+new Chart(document.getElementById('chartCargas'), {
+  type: 'bar',
+  data: {
+    labels: cargasData.map(c => `#${c.id} (${c.fecha})`),
+    datasets: [
+      { label: 'Nuevos', data: cargasData.map(c => c.nuevos), backgroundColor: '#FF4D2E' },
+      { label: 'Actualizados', data: cargasData.map(c => c.actualizados), backgroundColor: '#3b82f6' },
+    ]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { labels: { color: '#cfd3e6' } } },
+    scales: {
+      x: { stacked: true, ticks: { color: '#94a3b8' }, grid: { color: '#2a356d' } },
+      y: { stacked: true, ticks: { color: '#94a3b8' }, grid: { color: '#2a356d' } }
+    }
+  }
+});
+
+new Chart(document.getElementById('chartProvincias'), {
+  type: 'doughnut',
+  data: {
+    labels: provData.map(p => p.provincia),
+    datasets: [{
+      data: provData.map(p => p.total),
+      backgroundColor: ['#FF4D2E', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16', '#f97316', '#a855f7']
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { position: 'right', labels: { color: '#cfd3e6', font: { size: 11 } } } }
+  }
+});
+</script>
+</body>
+</html>
